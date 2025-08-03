@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Train Predictive Model - Earnings Analyzer{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-lg">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-brain me-2"></i>
+                    Train Predictive Model
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <h6><i class="fas fa-info-circle me-2"></i>Training Requirements:</h6>
+                    <p class="mb-2">To train the predictive model, you need:</p>
+                    <ul class="mb-0">
+                        <li><strong>Multiple PDF Transcripts</strong> - At least 3-5 earnings call transcripts for effective training</li>
+                        <li><strong>Excel File with Earnings Data</strong> - Historical performance data matching the transcripts</li>
+                    </ul>
+                </div>
+
+                <form method="POST" action="{{ url_for('train_model') }}" enctype="multipart/form-data" id="trainingForm">
+                    
+                    <!-- Transcript Files Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="upload-section">
+                                <h5><i class="fas fa-file-pdf text-danger me-2"></i>1. Upload Transcript Files</h5>
+                                <div class="upload-area" id="transcriptUploadArea">
+                                    <div class="text-center">
+                                        <i class="fas fa-upload upload-icon text-primary"></i>
+                                        <h6 class="mt-2">Drag & Drop PDF Transcripts</h6>
+                                        <p class="text-muted small">or click to browse</p>
+                                        <input type="file" name="transcript_files" multiple accept=".pdf" class="form-control d-none" id="transcriptInput">
+                                        <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('transcriptInput').click()">
+                                            <i class="fas fa-folder-open me-2"></i>Browse PDFs
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="selected-files mt-3" id="transcriptFiles" style="display: none;">
+                                    <h6><i class="fas fa-files me-2"></i>Selected Transcripts:</h6>
+                                    <div class="file-list" id="transcriptFileList"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Excel File Section -->
+                        <div class="col-md-6">
+                            <div class="upload-section">
+                                <h5><i class="fas fa-file-excel text-success me-2"></i>2. Upload Earnings Data</h5>
+                                <div class="upload-area" id="excelUploadArea">
+                                    <div class="text-center">
+                                        <i class="fas fa-upload upload-icon text-success"></i>
+                                        <h6 class="mt-2">Upload Excel File</h6>
+                                        <p class="text-muted small">with earnings performance data</p>
+                                        <input type="file" name="earnings_file" accept=".xlsx,.xls" class="form-control d-none" id="excelInput">
+                                        <button type="button" class="btn btn-outline-success" onclick="document.getElementById('excelInput').click()">
+                                            <i class="fas fa-file-excel me-2"></i>Browse Excel
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="selected-files mt-3" id="excelFile" style="display: none;">
+                                    <h6><i class="fas fa-file me-2"></i>Selected Excel File:</h6>
+                                    <div class="file-info" id="excelFileInfo"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Excel Format Requirements -->
+                    <div class="alert alert-warning mb-4">
+                        <h6><i class="fas fa-table me-2"></i>Excel File Format Requirements:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Required Columns:</strong>
+                                <ul class="mb-0 small">
+                                    <li><strong>Column 1:</strong> Earnings Quarter (e.g., "Q1 2023", "2023Q1")</li>
+                                    <li><strong>Last Column:</strong> Stock Price Movement (% change, e.g., "+5.2", "-3.1")</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Optional Columns (between Quarter and Stock Movement):</strong>
+                                <ul class="mb-0 small">
+                                    <li><strong>EPS vs Expectations:</strong> "Beat", "Miss", or "Meet"</li>
+                                    <li><strong>Guidance vs Expectations:</strong> "Beat", "Miss", or "Meet"</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <strong>Example:</strong> Quarter | EPS_Result | Guidance_Result | Stock_Movement<br>
+                                Q1_2023 | Beat | Meet | +4.5
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Training Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-warning btn-lg" id="trainBtn" disabled>
+                            <i class="fas fa-cogs me-2"></i>
+                            Train Predictive Model
+                            <span class="spinner-border spinner-border-sm ms-2 d-none" id="trainSpinner"></span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Features Description -->
+                <div class="mt-5">
+                    <h6><i class="fas fa-lightbulb me-2"></i>What the model learns:</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="feature-box text-center p-3">
+                                <i class="fas fa-heart feature-icon text-info"></i>
+                                <h6>Sentiment Patterns</h6>
+                                <p class="text-muted small">How emotional tone correlates with stock movement</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-box text-center p-3">
+                                <i class="fas fa-chart-line feature-icon text-primary"></i>
+                                <h6>Call Strength</h6>
+                                <p class="text-muted small">Confidence levels and financial strength indicators</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-box text-center p-3">
+                                <i class="fas fa-exclamation-triangle feature-icon text-warning"></i>
+                                <h6>Concern Signals</h6>
+                                <p class="text-muted small">Evasive language and uncertainty patterns</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-box text-center p-3">
+                                <i class="fas fa-target feature-icon text-success"></i>
+                                <h6>Performance Data</h6>
+                                <p class="text-muted small">EPS and guidance vs expectations impact</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const transcriptInput = document.getElementById('transcriptInput');
+    const excelInput = document.getElementById('excelInput');
+    const transcriptUploadArea = document.getElementById('transcriptUploadArea');
+    const excelUploadArea = document.getElementById('excelUploadArea');
+    const transcriptFiles = document.getElementById('transcriptFiles');
+    const excelFile = document.getElementById('excelFile');
+    const transcriptFileList = document.getElementById('transcriptFileList');
+    const excelFileInfo = document.getElementById('excelFileInfo');
+    const trainBtn = document.getElementById('trainBtn');
+    const trainSpinner = document.getElementById('trainSpinner');
+    const trainingForm = document.getElementById('trainingForm');
+
+    // Drag and drop for transcripts
+    transcriptUploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        transcriptUploadArea.classList.add('drag-over');
+    });
+
+    transcriptUploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        transcriptUploadArea.classList.remove('drag-over');
+    });
+
+    transcriptUploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        transcriptUploadArea.classList.remove('drag-over');
+        
+        const files = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
+        if (files.length > 0) {
+            handleTranscriptFiles(files);
+        }
+    });
+
+    // Drag and drop for excel
+    excelUploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        excelUploadArea.classList.add('drag-over');
+    });
+
+    excelUploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        excelUploadArea.classList.remove('drag-over');
+    });
+
+    excelUploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        excelUploadArea.classList.remove('drag-over');
+        
+        const files = Array.from(e.dataTransfer.files).filter(file => 
+            file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+        );
+        if (files.length > 0) {
+            handleExcelFile(files[0]);
+        }
+    });
+
+    transcriptInput.addEventListener('change', function(e) {
+        handleTranscriptFiles(Array.from(e.target.files));
+    });
+
+    excelInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleExcelFile(e.target.files[0]);
+        }
+    });
+
+    function handleTranscriptFiles(files) {
+        // Update transcript input
+        const dt = new DataTransfer();
+        files.forEach(file => dt.items.add(file));
+        transcriptInput.files = dt.files;
+
+        // Display selected files
+        transcriptFileList.innerHTML = '';
+        files.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded';
+            fileItem.innerHTML = `
+                <span><i class="fas fa-file-pdf text-danger me-2"></i>${file.name}</span>
+                <span class="badge bg-secondary">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+            `;
+            transcriptFileList.appendChild(fileItem);
+        });
+
+        transcriptFiles.style.display = 'block';
+        checkFormValidity();
+    }
+
+    function handleExcelFile(file) {
+        // Update excel input
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        excelInput.files = dt.files;
+
+        // Display selected file
+        excelFileInfo.innerHTML = `
+            <div class="file-item d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                <span><i class="fas fa-file-excel text-success me-2"></i>${file.name}</span>
+                <span class="badge bg-secondary">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+            </div>
+        `;
+
+        excelFile.style.display = 'block';
+        checkFormValidity();
+    }
+
+    function checkFormValidity() {
+        const hasTranscripts = transcriptInput.files.length > 0;
+        const hasExcel = excelInput.files.length > 0;
+        
+        trainBtn.disabled = !(hasTranscripts && hasExcel);
+        
+        if (hasTranscripts && hasExcel) {
+            trainBtn.classList.remove('btn-secondary');
+            trainBtn.classList.add('btn-warning');
+        } else {
+            trainBtn.classList.remove('btn-warning');
+            trainBtn.classList.add('btn-secondary');
+        }
+    }
+
+    trainingForm.addEventListener('submit', function(e) {
+        trainBtn.disabled = true;
+        trainSpinner.classList.remove('d-none');
+        trainBtn.innerHTML = '<i class="fas fa-cogs me-2"></i>Training Model... <span class="spinner-border spinner-border-sm ms-2"></span>';
+    });
+
+    // Initial validation check
+    checkFormValidity();
+});
+</script>
+{% endblock %}
