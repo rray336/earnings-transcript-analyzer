@@ -272,12 +272,31 @@ def prepare_results_for_web(analysis_results, model_results=None, model_availabl
         elif 'predictions_new' in model_results:  # Using saved model
             predictions_data = model_results['predictions_new']
             
+        # Check if feature importance values are all zero (invalid model)
+        feature_importance_data = model_results['feature_importance'].head(5).to_dict('records') if hasattr(model_results['feature_importance'], 'head') else model_results['feature_importance'][:5]
+        
+        # Check if all importance values are zero
+        has_valid_importance = False
+        if feature_importance_data:
+            has_valid_importance = any(item.get('importance', 0) > 0 for item in feature_importance_data)
+        
+        # If all importances are zero, create a warning message
+        if not has_valid_importance:
+            feature_importance_data = [
+                {'feature': 'Model needs retraining', 'importance': 0.0},
+                {'feature': 'Insufficient training data detected', 'importance': 0.0},
+                {'feature': 'Please retrain with more diverse data', 'importance': 0.0},
+                {'feature': 'Current predictions may be unreliable', 'importance': 0.0},
+                {'feature': 'Go to Train Model page to fix this', 'importance': 0.0}
+            ]
+        
         model_info['results'] = {
             'r2_score': round(model_results['r2'], 3),
             'mse': round(model_results['mse'], 3),
-            'feature_importance': model_results['feature_importance'].head(5).to_dict('records') if hasattr(model_results['feature_importance'], 'head') else model_results['feature_importance'][:5],
+            'feature_importance': feature_importance_data,
             'predictions': predictions_data,
-            'using_saved_model': 'predictions_new' in model_results
+            'using_saved_model': 'predictions_new' in model_results,
+            'model_needs_retraining': not has_valid_importance
         }
     
     return {'transcripts': web_results, 'model': model_info}

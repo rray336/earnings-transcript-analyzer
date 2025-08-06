@@ -115,3 +115,8 @@ yarn-error.log*
 # trained_models/
 # *.pkl
 # *.joblib
+
+# Git workflow scripts are included for convenience
+# sync.bat
+# quick-commit.bat
+# dev-start.bat

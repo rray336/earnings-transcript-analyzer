@@ -263,7 +263,11 @@ class EarningsTranscriptAnalyzer:
     
     def analyze_single_transcript(self, pdf_path):
         """Analyze a single earnings transcript"""
-        print(f"Analyzing: {pdf_path.name}")
+        if isinstance(pdf_path, str):
+            filename = os.path.basename(pdf_path)
+        else:
+            filename = pdf_path.name
+        print(f"Analyzing: {filename}")
         
         # Extract text
         text = self.extract_text_from_pdf(pdf_path)
@@ -300,7 +304,7 @@ class EarningsTranscriptAnalyzer:
         
         # Compile results
         results = {
-            'file_name': pdf_path.name,
+            'file_name': filename,
             'word_count': len(sections['full_text'].split()),
             'prepared_remarks_sentiment': prepared_sentiment,
             'qa_sentiment': qa_sentiment,
@@ -385,9 +389,9 @@ class EarningsTranscriptAnalyzer:
                     break
             
             if earnings_row is not None:
-                # Extract features
+                # Extract enhanced features for better prediction
                 features = {
-                    # Sentiment features
+                    # Core sentiment features
                     'overall_sentiment': results['overall_sentiment']['textblob_polarity'],
                     'prepared_sentiment': results['prepared_remarks_sentiment']['textblob_polarity'],
                     'qa_sentiment': results['qa_sentiment']['textblob_polarity'],
@@ -396,6 +400,15 @@ class EarningsTranscriptAnalyzer:
                     'overall_strength': results['call_strength']['overall_strength'],
                     'prepared_strength': results['call_strength']['prepared_remarks']['composite_score'],
                     'qa_strength': results['call_strength']['qa_section']['composite_score'],
+                    
+                    # Enhanced sentiment analysis
+                    'sentiment_volatility': abs(results['prepared_remarks_sentiment']['textblob_polarity'] - results['qa_sentiment']['textblob_polarity']),
+                    'sentiment_trend': results['qa_sentiment']['textblob_polarity'] - results['prepared_remarks_sentiment']['textblob_polarity'],
+                    
+                    # Question analysis enhancements
+                    'questions_per_1000_words': (results['question_count'] / results['word_count']) * 1000 if results['word_count'] > 0 else 0,
+                    'guidance_question_ratio': results['question_categories'].get('guidance', 0) / max(results['question_count'], 1),
+                    'margin_question_ratio': results['question_categories'].get('margins', 0) / max(results['question_count'], 1),
                     
                     # Concern features
                     'concern_ratio': results['analyst_concerns']['overall_concern_ratio'],
@@ -448,9 +461,23 @@ class EarningsTranscriptAnalyzer:
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
         
-        # Train model
-        model = RandomForestRegressor(n_estimators=100, random_state=42, max_depth=5)
+        # Enhanced model training with better hyperparameters
+        print(f"Training enhanced model with {len(feature_cols)} features and {len(df)} data points")
+        
+        # Use more sophisticated Random Forest configuration
+        model = RandomForestRegressor(
+            n_estimators=200,           # More trees for better accuracy
+            max_depth=4,                # Prevent overfitting with small dataset
+            min_samples_split=2,        # Allow more granular splits
+            min_samples_leaf=1,         # Allow single-sample leaves
+            max_features='sqrt',        # Feature subsampling
+            random_state=42,
+            bootstrap=True,             # Bootstrap sampling
+            oob_score=True              # Out-of-bag score for validation
+        )
         model.fit(X_train_scaled, y_train)
+        
+        print(f"Model trained. OOB Score: {model.oob_score_:.3f}")
         
         # Make predictions
         y_pred = model.predict(X_test_scaled)

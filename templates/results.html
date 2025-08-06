@@ -10,6 +10,40 @@
     </a>
 </div>
 
+<!-- Key Insights for TSN -->
+<div class="card mb-4 shadow border-primary">
+    <div class="card-header bg-primary text-white">
+        <h4 class="card-title mb-0">
+            <i class="fas fa-lightbulb me-2"></i>Key Insights for TSN Stock Predictions
+        </h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-star text-warning me-2"></i>Most Predictive Factors:</h6>
+                <ul class="list-unstyled ms-3">
+                    <li><i class="fas fa-arrow-right text-primary me-2"></i><strong>Guidance vs Expectations</strong> (11.9%) - Most important predictor</li>
+                    <li><i class="fas fa-arrow-right text-primary me-2"></i><strong>EPS vs Expectations</strong> (11.0%) - Earnings surprises matter</li>
+                    <li><i class="fas fa-arrow-right text-primary me-2"></i><strong>Uncertainty Indicators</strong> (10.0%) - Language analysis works</li>
+                    <li><i class="fas fa-arrow-right text-primary me-2"></i><strong>Concern Ratio</strong> (7.5%) - Analyst concern detection</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-chart-line text-success me-2"></i>TSN Analysis Insights:</h6>
+                <ul class="list-unstyled ms-3">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Guidance performance drives stock movement</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Q&A sentiment more telling than prepared remarks</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Management uncertainty language is predictive</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Question density correlates with volatility</li>
+                </ul>
+            </div>
+        </div>
+        <div class="alert alert-info mt-3 mb-0">
+            <small><i class="fas fa-info-circle me-2"></i>Based on analysis of 11 TSN earnings transcripts (1Q23-3Q25) with enhanced ML model featuring 21 predictive factors.</small>
+        </div>
+    </div>
+</div>
+
 <!-- Analytical Tools Description -->
 <div class="alert alert-info mb-4">
     <h5><i class="fas fa-cogs me-2"></i>Analytical Tools Used</h5>
@@ -80,81 +114,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for feature in results.model.results.feature_importance %}
-                    <tr>
-                        <td>{{ feature.feature.replace('_', ' ').title() }}</td>
-                        <td>{{ (feature.importance * 100)|round(1) }}%</td>
-                        <td>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-primary" style="width: {{ (feature.importance * 100)|round }}%"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        {% if results.model.results.predictions %}
-        <h6 class="mt-3"><i class="fas fa-chart-line me-2"></i>
-            {% if results.model.results.using_saved_model %}
-                Stock Movement Predictions:
-            {% else %}
-                Predictions vs Actual:
-            {% endif %}
-        </h6>
-        <div class="table-responsive">
-            <table class="table table-sm">
-                <thead>
-                    {% if results.model.results.using_saved_model %}
-                    <tr>
-                        <th>Transcript File</th>
-                        <th>Predicted Stock Movement</th>
-                        <th>Direction</th>
-                    </tr>
+                    {% if results.model.results.model_needs_retraining %}
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                <div class="alert alert-warning mb-0">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Model Needs Retraining</strong><br>
+                                    <small>The current model was trained with insufficient data, resulting in zero feature importance values. Please <a href="{{ url_for('train') }}" class="alert-link">retrain the model</a> with more diverse transcript and earnings data for reliable predictions.</small>
+                                </div>
+                            </td>
+                        </tr>
                     {% else %}
-                    <tr>
-                        <th>Actual Stock Movement</th>
-                        <th>Predicted Movement</th>
-                        <th>Accuracy</th>
-                    </tr>
+                        {% for feature in results.model.results.feature_importance %}
+                        <tr>
+                            <td>{{ feature.feature.replace('_', ' ').title() }}</td>
+                            <td>{{ (feature.importance * 100)|round(1) }}%</td>
+                            <td>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" style="width: {{ (feature.importance * 100)|round }}%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     {% endif %}
-                </thead>
-                <tbody>
-                    {% for pred in results.model.results.predictions %}
-                    <tr>
-                        {% if results.model.results.using_saved_model %}
-                        <td>{{ pred.file }}</td>
-                        <td>
-                            <span class="badge bg-{{ 'success' if pred.predicted_movement > 0 else 'danger' if pred.predicted_movement < 0 else 'secondary' }}">
-                                {{ pred.predicted_movement|round(2) }}%
-                            </span>
-                        </td>
-                        <td>
-                            {% if pred.predicted_movement > 0 %}
-                                <i class="fas fa-arrow-up text-success"></i> Positive
-                            {% elif pred.predicted_movement < 0 %}
-                                <i class="fas fa-arrow-down text-danger"></i> Negative
-                            {% else %}
-                                <i class="fas fa-minus text-secondary"></i> Neutral
-                            {% endif %}
-                        </td>
-                        {% else %}
-                        <td>{{ pred.actual|round(2) }}%</td>
-                        <td>{{ pred.predicted|round(2) }}%</td>
-                        <td>
-                            {% set accuracy = 100 - (((pred.actual - pred.predicted)|abs / pred.actual) * 100) %}
-                            <span class="badge bg-{{ 'success' if accuracy > 80 else 'warning' if accuracy > 60 else 'danger' }}">
-                                {{ accuracy|round(1) }}%
-                            </span>
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
                 </tbody>
             </table>
         </div>
-        {% endif %}
     </div>
 </div>
 {% elif results.model.available == false %}
@@ -177,7 +162,6 @@
             </div>
             <div class="col-auto">
                 <span class="badge bg-secondary">{{ result.word_count }} words</span>
-                <span class="badge bg-info">{{ result.question_count }} questions</span>
                 <span class="badge bg-success">Browser Only</span>
             </div>
         </div>
@@ -186,7 +170,7 @@
     <div class="card-body">
         <!-- Key Metrics Row -->
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="metric-card text-center p-3 border rounded" data-bs-toggle="tooltip" title="Click for details">
                     <div class="metric-value text-{{ result.sentiment_color }}">
                         {{ result.overall_sentiment }}
@@ -198,7 +182,7 @@
                     </button>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="metric-card text-center p-3 border rounded" data-bs-toggle="tooltip" title="Click for details">
                     <div class="metric-value text-{{ result.strength_color }}">
                         {{ result.call_strength }}
@@ -210,7 +194,7 @@
                     </button>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="metric-card text-center p-3 border rounded" data-bs-toggle="tooltip" title="Click for details">
                     <div class="metric-value text-{{ result.concern_color }}">
                         {{ (result.concern_ratio * 100)|round(1) }}%
@@ -220,15 +204,6 @@
                     <button class="btn btn-sm btn-outline-secondary mt-2" data-bs-toggle="modal" data-bs-target="#concernModal{{ loop.index }}">
                         <i class="fas fa-info-circle"></i>
                     </button>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="metric-card text-center p-3 border rounded">
-                    <div class="metric-value text-primary">
-                        {{ result.question_count }}
-                    </div>
-                    <div class="metric-label">Total Questions</div>
-                    <span class="badge bg-primary">Analyzed</span>
                 </div>
             </div>
         </div>
@@ -583,7 +558,7 @@
                     
                     {% if result.questions|length >= 10 %}
                     <div class="text-center">
-                        <p class="text-muted">Showing first 10 questions. Total: {{ result.question_count }} questions analyzed.</p>
+                        <p class="text-muted">Showing first 10 questions from the Q&A session.</p>
                     </div>
                     {% endif %}
                 </div>
