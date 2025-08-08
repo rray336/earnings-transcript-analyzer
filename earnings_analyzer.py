@@ -599,7 +599,7 @@ class EarningsTranscriptAnalyzer:
 # Example usage
 def main():
     # Set your paths here
-    PDF_FOLDER = r"C:\Users\rahul\OneDrive\IMP_DOCS\PORTFOLIO\STOCKS\CONSUMER HOUSING\TSN\Transcripts"
+    PDF_FOLDER = r"C:\Users\rahul\OneDrive\IMP_DOCS\PORTFOLIO\STOCKS\TRANSCRIPTS_FOLDER"
     EXCEL_FILE = os.path.join(PDF_FOLDER, "EarningsGuidance.xlsx")
 
     # Initialize analyzer with Excel data

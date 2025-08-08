@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Enhanced Model Training Script for TSN Earnings Analysis
-This script trains an improved model using all available TSN transcripts and enhanced features.
+Enhanced Model Training Script for Earnings Analysis
+This script trains an improved model using all available transcripts and enhanced features.
 """
 
 import os
@@ -11,12 +11,12 @@ from earnings_analyzer import EarningsTranscriptAnalyzer
 import pandas as pd
 
 def main():
-    print("Enhanced TSN Earnings Model Training")
+    print("Enhanced Earnings Model Training")
     print("=" * 50)
     
     # Paths
-    transcript_folder = r"C:\Users\rahul\OneDrive\IMP_DOCS\PORTFOLIO\STOCKS\CONSUMER HOUSING\TSN\Transcripts"
-    excel_file = "TSN_Enhanced_Earnings_Data.xlsx"
+    transcript_folder = r"C:\Users\rahul\OneDrive\IMP_DOCS\PORTFOLIO\STOCKS\TRANSCRIPTS_FOLDER"
+    excel_file = "Enhanced_Earnings_Data.xlsx"
     
     # Verify files exist
     if not os.path.exists(transcript_folder):
