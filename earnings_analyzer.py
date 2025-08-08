@@ -135,17 +135,41 @@ class EarningsTranscriptAnalyzer:
         return results
     
     def load_earnings_data(self):
-        """Load earnings data from Excel file"""
+        """Load earnings data from Excel file - supports 2-5 columns"""
         try:
             self.earnings_data = pd.read_excel(self.excel_file_path)
-            # Expected columns: Earnings, Earnings_Date, EPS_vs_Expectations, Guidance_vs_Expectations, Stock_Reaction
-            expected_cols = ['Earnings', 'Earnings_Date', 'EPS_vs_Expectations', 'Guidance_vs_Expectations', 'Stock_Reaction']
+            num_cols = len(self.earnings_data.columns)
             
-            if len(self.earnings_data.columns) >= 5:
-                self.earnings_data.columns = expected_cols[:len(self.earnings_data.columns)]
-                print(f"Loaded earnings data with {len(self.earnings_data)} records")
-            else:
-                print("Warning: Excel file has fewer than 5 columns. Please check format.")
+            # Define standard column names for different configurations
+            # Minimum 2 columns: Earnings, Stock_Reaction
+            # Maximum 5 columns: Earnings, Earnings_Date, EPS_vs_Expectations, Guidance_vs_Expectations, Stock_Reaction
+            standard_cols = ['Earnings', 'Earnings_Date', 'EPS_vs_Expectations', 'Guidance_vs_Expectations', 'Stock_Reaction']
+            
+            if num_cols < 2:
+                print("Error: Excel file must have at least 2 columns (Earnings, Stock_Reaction)")
+                self.earnings_data = None
+                return
+            elif num_cols > 5:
+                print("Warning: Excel file has more than 5 columns. Using first 5 columns.")
+                self.earnings_data = self.earnings_data.iloc[:, :5]
+                num_cols = 5
+            
+            # Assign appropriate column names based on number of columns
+            if num_cols == 2:
+                # Minimum: Earnings, Stock_Reaction
+                self.earnings_data.columns = ['Earnings', 'Stock_Reaction']
+            elif num_cols == 3:
+                # Earnings, Earnings_Date, Stock_Reaction
+                self.earnings_data.columns = ['Earnings', 'Earnings_Date', 'Stock_Reaction']
+            elif num_cols == 4:
+                # Earnings, Earnings_Date, EPS_vs_Expectations, Stock_Reaction
+                self.earnings_data.columns = ['Earnings', 'Earnings_Date', 'EPS_vs_Expectations', 'Stock_Reaction']
+            else:  # num_cols == 5
+                # Full format: Earnings, Earnings_Date, EPS_vs_Expectations, Guidance_vs_Expectations, Stock_Reaction
+                self.earnings_data.columns = standard_cols
+            
+            print(f"Loaded earnings data with {len(self.earnings_data)} records and {num_cols} columns")
+            print(f"Column mapping: {list(self.earnings_data.columns)}")
                 
         except Exception as e:
             print(f"Error loading earnings data: {str(e)}")

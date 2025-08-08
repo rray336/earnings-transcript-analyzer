@@ -88,17 +88,22 @@ earnings-analyzer/
 - Upload Excel file with earnings data (see format below)
 - Review training results and model performance
 
-### 3. **Excel Format for Training**
-Required columns for earnings data:
+### 3. **File Format Requirements**
+
+**PDF Transcript Naming:** Must follow `[TICKER]4Q24-Earnings-Call-Transcript.pdf` format
+- Examples: `CPB4Q24-Earnings-Call-Transcript.pdf`, `4Q24-Earnings-Call-Transcript.pdf`
+- Quarter must match Excel file exactly
+
+**Excel Format for Training:** Supports 2-5 columns
 ```
-Quarter       | EPS_Result | Guidance_Result | Stock_Movement
-Q1_2023      | Beat       | Meet           | +4.5
-Q2_2023      | Miss       | Beat           | -2.1
+Earnings | EPS_vs_Expectations | Guidance_vs_Expectations | Stock_Reaction
+4Q24     | Beat               | Meet                    | +4.5
+1Q25     | Miss               | Beat                    | -2.1
 ```
 
-- **Column 1**: Earnings Quarter (e.g., "Q1 2023", "2023Q1")
-- **Middle Columns** (optional): EPS vs Expectations, Guidance vs Expectations ("Beat", "Miss", "Meet")
-- **Last Column**: Stock Price Movement (% change, e.g., "+5.2", "-3.1")
+- **Earnings Column**: Must use format `4Q24`, `1Q25`, `2Q25`, `3Q25` (matches transcript filename)
+- **Optional Columns**: EPS vs Expectations, Guidance vs Expectations ("Beat", "Miss", "Meet")
+- **Stock_Reaction**: Stock price movement (% change, e.g., "+5.2", "-3.1")
 
 ## 🔧 Technical Details
 

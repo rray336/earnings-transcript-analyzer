@@ -77,8 +77,15 @@ The main script is configured to analyze transcripts in a specific folder struct
 ## Data Requirements
 
 The analyzer expects:
-1. **PDF transcripts** in a designated folder
-2. **Optional Excel file** with columns: Earnings, Earnings_Date, EPS_vs_Expectations, Guidance_vs_Expectations, Stock_Reaction
+1. **PDF transcripts** following naming convention: `[TICKER]4Q24-Earnings-Call-Transcript.pdf`
+   - Examples: `CPB4Q24-Earnings-Call-Transcript.pdf` or `4Q24-Earnings-Call-Transcript.pdf`
+   - Quarter format must match Excel file (e.g., `4Q24`, `1Q25`, `2Q25`, `3Q25`)
+2. **Excel file with flexible column structure** supporting 2-5 columns:
+   - **Minimum (2 columns):** Earnings, Stock_Reaction
+   - **With Date (3 columns):** Earnings, Earnings_Date, Stock_Reaction  
+   - **With EPS (4 columns):** Earnings, Earnings_Date, EPS_vs_Expectations, Stock_Reaction
+   - **Full Format (5 columns):** Earnings, Earnings_Date, EPS_vs_Expectations, Guidance_vs_Expectations, Stock_Reaction
+   - **Earnings column must use format:** `4Q24`, `1Q25`, `2Q25`, etc.
 
 All analysis results are displayed in the web browser interface only - no files are generated.
 
