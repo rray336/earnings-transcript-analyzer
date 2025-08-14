@@ -55,6 +55,35 @@ A powerful AI-powered web application that analyzes earnings call transcripts to
    http://localhost:5000
    ```
 
+## 🚀 Deploy to Railway (Recommended Cloud Hosting)
+
+Deploy your own live version of this app to Railway in minutes:
+
+### **One-Click Deploy**
+1. **Fork this repository** to your GitHub account
+2. **Sign up at [railway.app](https://railway.app)** (free tier available)
+3. **Click "New Project"** → **"Deploy from GitHub repo"**
+4. **Select your forked repository**
+5. **Railway automatically detects and deploys** your Python Flask app
+6. **Get your live URL** (e.g., `https://your-app-name.up.railway.app`)
+
+### **Why Railway?**
+- ✅ **Zero configuration** - Works with your existing code
+- ✅ **File uploads persist** - PDF uploads and trained models are saved
+- ✅ **Free tier** - Perfect for testing and light usage
+- ✅ **Automatic scaling** - Handles traffic spikes seamlessly
+- ✅ **Custom domains** - Add your own domain name
+- ✅ **HTTPS included** - Secure connections out of the box
+
+### **Railway Features**
+- **Persistent Storage**: Uploaded files and ML models remain available
+- **Environment Variables**: Configure settings without code changes
+- **Automatic Deployments**: Push to GitHub → Automatic Railway deployment
+- **Usage Metrics**: Monitor app performance and resource usage
+- **Team Collaboration**: Share access with team members
+
+**Live Demo**: *[Add your Railway URL here after deployment]*
+
 ## 📁 Project Structure
 
 ```
@@ -62,6 +91,7 @@ earnings-analyzer/
 ├── app.py                     # Flask web application
 ├── earnings_analyzer.py       # Core analysis engine
 ├── requirements.txt           # Python dependencies
+├── Procfile                   # Railway deployment configuration
 ├── CLAUDE.md                 # Development guide
 ├── README.md                 # This file
 ├── templates/                # HTML templates

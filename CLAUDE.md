@@ -36,6 +36,26 @@ python earnings_analyzer.py
 ```
 The main script is configured to analyze transcripts in a specific folder structure. You'll need to update the paths in the `main()` function (lines 657-658) to point to your transcript folder and optional Excel file.
 
+### Railway Deployment
+
+The application is configured for easy deployment to Railway:
+
+**Deployment Files:**
+- `Procfile` - Specifies `web: python app.py` for Railway startup
+- `app.py` - Updated to use `PORT` environment variable from Railway
+- `requirements.txt` - All dependencies for Railway auto-installation
+
+**Railway Features:**
+- **File Persistence**: `uploads/` and `trained_models/` directories persist between deployments
+- **Environment Variables**: Railway automatically provides `PORT` variable
+- **Auto-scaling**: Handles traffic increases automatically
+- **GitHub Integration**: Push to main branch triggers automatic deployment
+
+**Local Development Compatibility:**
+- App defaults to port 5000 when `PORT` environment variable is not set
+- All Railway changes maintain full local development functionality
+- No additional configuration needed for local vs. production
+
 ## Code Architecture
 
 ### Core Class: EarningsTranscriptAnalyzer
